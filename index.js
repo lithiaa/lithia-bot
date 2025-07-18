@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 require('dotenv').config();
 const fs = require('fs');
+const languageManager = require('./languageManager');
 
 const client = new Client({
   intents: [
@@ -26,7 +27,7 @@ for (const file of commandFiles) {
 
 // Event saat bot siap
 client.once('ready', () => {
-  console.log(`Bot is online as ${client.user.tag}!`);
+  console.log(languageManager.translate('system', 'bot.online', { tag: client.user.tag }));
 });
 
 // Event saat pesan dibuat
@@ -44,7 +45,8 @@ client.on('messageCreate', async (message) => {
     await command.execute(message, args);
   } catch (error) {
     console.error(error);
-    message.channel.send('There was an error executing that command.');
+    const errorMsg = languageManager.translate(message.author.id, 'bot.error');
+    message.channel.send(errorMsg);
   }
 });
 

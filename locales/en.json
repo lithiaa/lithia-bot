@@ -1,0 +1,56 @@
+{
+  "bot": {
+    "online": "Bot is online as {tag}!",
+    "error": "There was an error executing that command."
+  },
+  "help": {
+    "title": "📜 Available Commands",
+    "description": "Use `{prefix}<command>` to run a command.",
+    "noDescription": "No description provided."
+  },
+  "ping": {
+    "response": "Pong! Latency: {latency}ms"
+  },
+  "numberpicker": {
+    "title": "🎲 Number Picker",
+    "description": "**Range:** {min} - {max}\n**Result:** `{result}`",
+    "rangeInfo": "📊 Range Info",
+    "totalPossibilities": "Total possibilities: {count} numbers",
+    "selectedNumber": "🎯 Selected Number",
+    "pickedFor": "Picked for {username}",
+    "errors": {
+      "wrongFormat": {
+        "title": "❌ Wrong Format",
+        "description": "Use format: `{prefix}numberpicker <min> <max>`\n\n**Examples:**\n`{prefix}numberpicker 1 100`\n`{prefix}numberpicker 10 50`",
+        "footer": "Enter two numbers as minimum and maximum range"
+      },
+      "invalidInput": {
+        "title": "❌ Invalid Input",
+        "description": "Both arguments must be numbers!\n\n**Correct example:**\n`{prefix}numberpicker 1 100`",
+        "footer": "Make sure you enter numbers, not letters or other characters"
+      },
+      "invalidRange": {
+        "title": "❌ Invalid Range",
+        "description": "Minimum number ({min}) must be smaller than maximum number ({max})!\n\n**Correct example:**\n`{prefix}numberpicker 1 100`",
+        "footer": "Make sure the first number is smaller than the second"
+      },
+      "rangeTooBig": {
+        "title": "❌ Range Too Large",
+        "description": "Maximum range is 1,000,000 numbers.\n\nPlease use a smaller range.",
+        "footer": "This limit prevents bot lag"
+      }
+    }
+  },
+  "language": {
+    "title": "🌐 Language Settings",
+    "current": "Current language: **{language}**",
+    "changed": "Language changed to **{language}**!",
+    "available": "Available languages:",
+    "usage": "Usage: `{prefix}language <code>`",
+    "invalid": "❌ Invalid language code. Available: {codes}",
+    "languages": {
+      "en": "English",
+      "id": "Indonesian"
+    }
+  }
+}

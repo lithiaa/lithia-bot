@@ -1,0 +1,56 @@
+{
+  "bot": {
+    "online": "Bot sedang online sebagai {tag}!",
+    "error": "Terjadi kesalahan saat menjalankan perintah tersebut."
+  },
+  "help": {
+    "title": "📜 Perintah yang Tersedia",
+    "description": "Gunakan `{prefix}<perintah>` untuk menjalankan perintah.",
+    "noDescription": "Tidak ada deskripsi tersedia."
+  },
+  "ping": {
+    "response": "Pong! Latensi: {latency}ms"
+  },
+  "numberpicker": {
+    "title": "🎲 Pemilih Nomor",
+    "description": "**Rentang:** {min} - {max}\n**Hasil:** `{result}`",
+    "rangeInfo": "📊 Info Rentang",
+    "totalPossibilities": "Total kemungkinan: {count} angka",
+    "selectedNumber": "🎯 Nomor Terpilih",
+    "pickedFor": "Dipilih untuk {username}",
+    "errors": {
+      "wrongFormat": {
+        "title": "❌ Format Salah",
+        "description": "Gunakan format: `{prefix}numberpicker <min> <max>`\n\n**Contoh:**\n`{prefix}numberpicker 1 100`\n`{prefix}numberpicker 10 50`",
+        "footer": "Masukkan dua angka sebagai rentang minimum dan maksimum"
+      },
+      "invalidInput": {
+        "title": "❌ Input Tidak Valid",
+        "description": "Kedua argumen harus berupa angka!\n\n**Contoh yang benar:**\n`{prefix}numberpicker 1 100`",
+        "footer": "Pastikan Anda memasukkan angka, bukan huruf atau karakter lain"
+      },
+      "invalidRange": {
+        "title": "❌ Rentang Tidak Valid",
+        "description": "Angka minimum ({min}) harus lebih kecil dari angka maksimum ({max})!\n\n**Contoh yang benar:**\n`{prefix}numberpicker 1 100`",
+        "footer": "Pastikan angka pertama lebih kecil dari angka kedua"
+      },
+      "rangeTooBig": {
+        "title": "❌ Rentang Terlalu Besar",
+        "description": "Rentang maksimal adalah 1,000,000 angka.\n\nSilakan gunakan rentang yang lebih kecil.",
+        "footer": "Batasan ini untuk mencegah lag pada bot"
+      }
+    }
+  },
+  "language": {
+    "title": "🌐 Pengaturan Bahasa",
+    "current": "Bahasa saat ini: **{language}**",
+    "changed": "Bahasa berhasil diubah ke **{language}**!",
+    "available": "Bahasa yang tersedia:",
+    "usage": "Penggunaan: `{prefix}language <kode>`",
+    "invalid": "❌ Kode bahasa tidak valid. Tersedia: {codes}",
+    "languages": {
+      "en": "Inggris",
+      "id": "Indonesia"
+    }
+  }
+}

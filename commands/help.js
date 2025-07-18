@@ -1,15 +1,19 @@
+const languageManager = require('../languageManager');
+
 module.exports = {
   name: 'help',
-  description: 'Displays a list of available commands.',
+  description: 'Displays a list of available commands / Menampilkan daftar perintah yang tersedia.',
   execute(message, args) {
+    const userId = message.author.id;
     const prefix = process.env.PREFIX || '!';
     const commands = message.client.commands;
 
-    let helpMessage = `**📜 Available Commands:**\n\n`;
-    helpMessage += `Use \`${prefix}<command>\` to run a command.\n\n`;
+    let helpMessage = `**${languageManager.translate(userId, 'help.title')}**\n\n`;
+    helpMessage += `${languageManager.translate(userId, 'help.description', { prefix })}\n\n`;
 
     commands.forEach(command => {
-      helpMessage += `**${prefix}${command.name}** - ${command.description || 'No description provided.'}\n`;
+      const description = command.description || languageManager.translate(userId, 'help.noDescription');
+      helpMessage += `**${prefix}${command.name}** - ${description}\n`;
     });
 
     message.channel.send(helpMessage).catch(console.error);
