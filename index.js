@@ -110,7 +110,13 @@ client.once('ready', async () => {
 
 // Event untuk slash commands
 client.on('interactionCreate', async (interaction) => {
-  console.log(`🔍 Interaction received: ${interaction.type} | Command: ${interaction.commandName || 'N/A'}`);
+  const startTime = Date.now();
+  console.log(`🔍 [${new Date().toISOString()}] Interaction received:`);
+  console.log(`  └─ Type: ${interaction.type}`);
+  console.log(`  └─ Command: ${interaction.commandName || 'N/A'}`);
+  console.log(`  └─ User: ${interaction.user.username} (${interaction.user.id})`);
+  console.log(`  └─ Guild: ${interaction.guild?.name || 'DM'}`);
+  console.log(`  └─ Channel: ${interaction.channel?.name || 'Unknown'}`);
   
   if (!interaction.isChatInputCommand()) {
     console.log('  └─ Not a chat input command, ignoring');
@@ -132,31 +138,29 @@ client.on('interactionCreate', async (interaction) => {
     return;
   }
 
-  console.log(`✅ Executing slash command: ${interaction.commandName} by ${interaction.user.username}`);
+  console.log(`✅ Executing slash command: ${interaction.commandName}`);
+  console.log(`  └─ Bot Ping: ${client.ws.ping}ms`);
+  console.log(`  └─ Memory: ${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`);
 
-  // Set a timeout to auto-defer if command takes too long
-  const timeoutId = setTimeout(async () => {
-    if (!interaction.replied && !interaction.deferred) {
-      console.log(`⏰ Auto-deferring ${interaction.commandName} due to timeout`);
-      try {
-        await interaction.deferReply();
-      } catch (error) {
-        console.error('Failed to auto-defer:', error);
-      }
-    }
-  }, 2500); // Defer after 2.5 seconds if not already done
+  // Immediate defer untuk VM
+  let deferred = false;
+  try {
+    console.log(`  └─ Attempting immediate defer...`);
+    await interaction.deferReply();
+    deferred = true;
+    console.log(`  └─ Deferred successfully in ${Date.now() - startTime}ms`);
+  } catch (deferError) {
+    console.error(`  └─ Failed to defer:`, deferError);
+  }
 
   try {
     if (command.executeSlash) {
+      console.log(`  └─ Calling executeSlash method...`);
       await command.executeSlash(interaction);
-      console.log(`✅ Successfully executed slash command: ${interaction.commandName}`);
+      const totalTime = Date.now() - startTime;
+      console.log(`✅ Successfully executed slash command: ${interaction.commandName} in ${totalTime}ms`);
     } else {
       console.log('  └─ No executeSlash method, using fallback');
-      
-      // Defer if not already done
-      if (!interaction.replied && !interaction.deferred) {
-        await interaction.deferReply();
-      }
       
       // Fallback: convert interaction to message-like object for backward compatibility
       const fakeMessage = {
@@ -188,17 +192,21 @@ client.on('interactionCreate', async (interaction) => {
       }
       
       await command.execute(fakeMessage, args);
-      console.log(`✅ Successfully executed fallback for: ${interaction.commandName}`);
+      const totalTime = Date.now() - startTime;
+      console.log(`✅ Successfully executed fallback for: ${interaction.commandName} in ${totalTime}ms`);
     }
   } catch (error) {
-    console.error(`❌ Error executing command ${interaction.commandName}:`, error);
+    const totalTime = Date.now() - startTime;
+    console.error(`❌ Error executing command ${interaction.commandName} after ${totalTime}ms:`, error);
+    console.error(`  └─ Error type: ${error.constructor.name}`);
+    console.error(`  └─ Error message: ${error.message}`);
     
     try {
       const errorMsg = '❌ An error occurred while executing this command.';
       
       if (interaction.replied) {
         await interaction.followUp({ content: errorMsg, ephemeral: true });
-      } else if (interaction.deferred) {
+      } else if (interaction.deferred || deferred) {
         await interaction.editReply(errorMsg);
       } else {
         await interaction.reply({ content: errorMsg, ephemeral: true });
@@ -206,8 +214,6 @@ client.on('interactionCreate', async (interaction) => {
     } catch (replyError) {
       console.error('Failed to send error message:', replyError);
     }
-  } finally {
-    clearTimeout(timeoutId);
   }
 });
 

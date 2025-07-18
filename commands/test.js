@@ -13,20 +13,15 @@ module.exports = {
 
   async executeSlash(interaction) {
     try {
-      // Defer reply immediately to prevent timeout
-      await interaction.deferReply();
+      console.log('Test command: Starting execution');
       
-      // Then edit the reply
+      // Karena sudah di-defer di index.js, langsung edit reply
       await interaction.editReply('✅ Test slash command works!');
       console.log(`Test slash command executed by ${interaction.user.username}`);
     } catch (error) {
       console.error('Error in test slash command:', error);
       try {
-        if (interaction.deferred) {
-          await interaction.editReply('❌ Error occurred but command received!');
-        } else {
-          await interaction.reply('❌ Error occurred but command received!');
-        }
+        await interaction.editReply('❌ Error occurred but command received!');
       } catch (replyError) {
         console.error('Failed to send error reply:', replyError);
       }

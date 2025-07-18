@@ -49,9 +49,9 @@ module.exports = {
     const userId = interaction.user.id;
     
     try {
-      // Defer reply to prevent timeout
-      await interaction.deferReply();
+      console.log('ActiveDevBadge: Starting execution');
       
+      // Karena sudah di-defer di index.js, langsung edit reply
       await interaction.editReply({
         embeds: [{
           color: 0x5865F2,
@@ -88,11 +88,7 @@ module.exports = {
       console.error('Error in activedevbadge executeSlash:', error);
       
       try {
-        if (interaction.deferred) {
-          await interaction.editReply('🎉 Active Developer Badge command executed! Visit https://discord.com/developers/active-developer to claim your badge!');
-        } else {
-          await interaction.reply('🎉 Active Developer Badge command executed! Visit https://discord.com/developers/active-developer to claim your badge!');
-        }
+        await interaction.editReply('🎉 Active Developer Badge command executed! Visit https://discord.com/developers/active-developer to claim your badge!');
       } catch (replyError) {
         console.error('Failed to send error message:', replyError);
       }

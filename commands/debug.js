@@ -13,14 +13,16 @@ module.exports = {
 
   async executeSlash(interaction) {
     console.log('🔍 Debug slash command started');
+    console.log('  └─ Already deferred:', interaction.deferred);
+    console.log('  └─ Already replied:', interaction.replied);
     
     try {
-      console.log('  └─ Sending immediate reply');
-      await interaction.reply({
+      console.log('  └─ Sending edit reply');
+      await interaction.editReply({
         content: '🔍 Debug slash command executed successfully!',
         ephemeral: false
       });
-      console.log('  └─ Reply sent successfully');
+      console.log('  └─ Edit reply sent successfully');
     } catch (error) {
       console.error('❌ Debug slash command error:', error);
       console.error('  └─ Stack trace:', error.stack);
