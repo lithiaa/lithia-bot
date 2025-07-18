@@ -30,31 +30,50 @@ if (commands.length === 0) {
   process.exit(0);
 }
 
-// Register slash commands
+// Deploy commands
 async function deployCommands() {
   try {
     console.log(`🔄 Started refreshing ${commands.length} application (/) commands.`);
+    console.log('📋 Commands to register:');
+    commands.forEach(cmd => {
+      console.log(`  • /${cmd.name} - ${cmd.description}`);
+    });
     
     const rest = new REST({ version: '10' }).setToken(TOKEN);
     
+    // First, delete all existing commands to force refresh
+    console.log('🗑️ Clearing existing commands...');
+    await rest.put(Routes.applicationCommands(CLIENT_ID), { body: [] });
+    console.log('✅ Existing commands cleared');
+    
+    // Wait a moment
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Now register the new commands
+    console.log('📤 Registering new commands...');
     const data = await rest.put(
       Routes.applicationCommands(CLIENT_ID),
       { body: commands },
     );
     
-    console.log(`✅ Successfully reloaded ${data.length} application (/) commands.`);
+    console.log(`✅ Successfully registered ${data.length} application (/) commands.`);
     console.log('📋 Registered commands:');
     data.forEach(cmd => {
       console.log(`  • /${cmd.name} - ${cmd.description}`);
     });
+    
+    console.log('\n🎉 Commands should be available in Discord within a few minutes!');
     
   } catch (error) {
     console.error('❌ Error registering slash commands:', error);
     
     if (error.code === 50035) {
       console.error('💡 Invalid Form Body - pastikan CLIENT_ID benar');
+      console.error(`   CLIENT_ID yang digunakan: ${CLIENT_ID}`);
     } else if (error.code === 50001) {
       console.error('💡 Missing Access - pastikan bot memiliki permission');
+    } else if (error.code === 401) {
+      console.error('💡 Unauthorized - pastikan DISCORD_TOKEN benar');
     }
   }
 }

@@ -39,15 +39,25 @@ const slashCommands = [];
 // Load semua commands dari folder ./commands
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
+console.log('🔄 Loading commands...');
 for (const file of commandFiles) {
-  const command = require(`./commands/${file}`);
-  client.commands.set(command.name, command);
-  
-  // Jika command memiliki slash command data, tambahkan ke array
-  if (command.data) {
-    slashCommands.push(command.data.toJSON());
+  try {
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.name, command);
+    console.log(`✅ Loaded command: ${command.name}`);
+    
+    // Jika command memiliki slash command data, tambahkan ke array
+    if (command.data) {
+      slashCommands.push(command.data.toJSON());
+      console.log(`  └─ Slash command registered: /${command.data.name}`);
+    }
+  } catch (error) {
+    console.error(`❌ Error loading command ${file}:`, error);
   }
 }
+
+console.log(`📊 Total commands loaded: ${client.commands.size}`);
+console.log(`📊 Total slash commands: ${slashCommands.length}`);
 
 // Register slash commands
 async function registerSlashCommands() {
@@ -100,19 +110,36 @@ client.once('ready', async () => {
 
 // Event untuk slash commands
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
+  console.log(`🔍 Interaction received: ${interaction.type} | Command: ${interaction.commandName || 'N/A'}`);
+  
+  if (!interaction.isChatInputCommand()) {
+    console.log('  └─ Not a chat input command, ignoring');
+    return;
+  }
 
   const command = client.commands.get(interaction.commandName);
 
   if (!command) {
-    console.error(`No command matching ${interaction.commandName} was found.`);
+    console.error(`❌ No command matching ${interaction.commandName} was found.`);
+    try {
+      await interaction.reply({ 
+        content: `❌ Command \`${interaction.commandName}\` not found.`, 
+        ephemeral: true 
+      });
+    } catch (error) {
+      console.error('Failed to send error reply:', error);
+    }
     return;
   }
+
+  console.log(`✅ Executing slash command: ${interaction.commandName} by ${interaction.user.username}`);
 
   try {
     if (command.executeSlash) {
       await command.executeSlash(interaction);
+      console.log(`✅ Successfully executed slash command: ${interaction.commandName}`);
     } else {
+      console.log('  └─ No executeSlash method, using fallback');
       // Fallback: convert interaction to message-like object for backward compatibility
       const fakeMessage = {
         author: interaction.user,
@@ -131,15 +158,20 @@ client.on('interactionCreate', async (interaction) => {
       }
       
       await command.execute(fakeMessage, args);
+      console.log(`✅ Successfully executed fallback for: ${interaction.commandName}`);
     }
   } catch (error) {
-    console.error(error);
+    console.error(`❌ Error executing command ${interaction.commandName}:`, error);
     const errorMsg = languageManager.translate(interaction.user.id, 'bot.error');
     
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({ content: errorMsg, ephemeral: true });
-    } else {
-      await interaction.reply({ content: errorMsg, ephemeral: true });
+    try {
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({ content: errorMsg, ephemeral: true });
+      } else {
+        await interaction.reply({ content: errorMsg, ephemeral: true });
+      }
+    } catch (replyError) {
+      console.error('Failed to send error message:', replyError);
     }
   }
 });
