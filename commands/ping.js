@@ -16,9 +16,26 @@ module.exports = {
   },
 
   async executeSlash(interaction) {
-    const userId = interaction.user.id;
-    const latency = Date.now() - interaction.createdTimestamp;
-    const response = languageManager.translate(userId, 'ping.response', { latency });
-    await interaction.reply(response);
+    try {
+      // Defer reply immediately
+      await interaction.deferReply();
+      
+      const userId = interaction.user.id;
+      const latency = Date.now() - interaction.createdTimestamp;
+      const response = languageManager.translate(userId, 'ping.response', { latency });
+      
+      await interaction.editReply(response);
+    } catch (error) {
+      console.error('Error in ping slash command:', error);
+      try {
+        if (interaction.deferred) {
+          await interaction.editReply('Pong! (Error occurred)');
+        } else {
+          await interaction.reply('Pong! (Error occurred)');
+        }
+      } catch (replyError) {
+        console.error('Failed to send error reply:', replyError);
+      }
+    }
   },
 };

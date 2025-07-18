@@ -25,27 +25,43 @@ module.exports = {
   },
 
   async executeSlash(interaction) {
-    const userId = interaction.user.id;
-    const prefix = process.env.PREFIX || '!';
-    const commands = interaction.client.commands;
+    try {
+      // Defer reply immediately
+      await interaction.deferReply();
+      
+      const userId = interaction.user.id;
+      const prefix = process.env.PREFIX || '!';
+      const commands = interaction.client.commands;
 
-    let helpMessage = `**${languageManager.translate(userId, 'help.title')}**\n\n`;
-    helpMessage += `${languageManager.translate(userId, 'help.description', { prefix })}\n\n`;
-    helpMessage += `**Slash Commands:**\n`;
+      let helpMessage = `**${languageManager.translate(userId, 'help.title')}**\n\n`;
+      helpMessage += `${languageManager.translate(userId, 'help.description', { prefix })}\n\n`;
+      helpMessage += `**Slash Commands:**\n`;
 
-    commands.forEach(command => {
-      const description = command.description || languageManager.translate(userId, 'help.noDescription');
-      if (command.data) {
-        helpMessage += `**/${command.name}** - ${description}\n`;
+      commands.forEach(command => {
+        const description = command.description || languageManager.translate(userId, 'help.noDescription');
+        if (command.data) {
+          helpMessage += `**/${command.name}** - ${description}\n`;
+        }
+      });
+
+      helpMessage += `\n**Prefix Commands:**\n`;
+      commands.forEach(command => {
+        const description = command.description || languageManager.translate(userId, 'help.noDescription');
+        helpMessage += `**${prefix}${command.name}** - ${description}\n`;
+      });
+
+      await interaction.editReply(helpMessage);
+    } catch (error) {
+      console.error('Error in help slash command:', error);
+      try {
+        if (interaction.deferred) {
+          await interaction.editReply('❌ Error loading help. Use `!help` for prefix commands.');
+        } else {
+          await interaction.reply('❌ Error loading help. Use `!help` for prefix commands.');
+        }
+      } catch (replyError) {
+        console.error('Failed to send error reply:', replyError);
       }
-    });
-
-    helpMessage += `\n**Prefix Commands:**\n`;
-    commands.forEach(command => {
-      const description = command.description || languageManager.translate(userId, 'help.noDescription');
-      helpMessage += `**${prefix}${command.name}** - ${description}\n`;
-    });
-
-    await interaction.reply(helpMessage);
+    }
   },
 };

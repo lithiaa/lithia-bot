@@ -104,38 +104,62 @@ module.exports = {
   },
 
   async executeSlash(interaction) {
-    const userId = interaction.user.id;
-    const newLanguage = interaction.options.getString('code');
-
-    // Jika tidak ada argumen, tampilkan bahasa saat ini dan yang tersedia
-    if (!newLanguage) {
-      const currentLang = languageManager.getUserLanguage(userId);
-      const currentLangName = languageManager.getLanguageName(currentLang, currentLang);
-      const availableLanguages = languageManager.getAvailableLanguages();
+    try {
+      // Defer reply immediately
+      await interaction.deferReply();
       
-      let languageList = '';
-      availableLanguages.forEach(code => {
-        const name = languageManager.getLanguageName(code, currentLang);
-        languageList += `\`${code}\` - ${name}\n`;
-      });
+      const userId = interaction.user.id;
+      const newLanguage = interaction.options.getString('code');
 
-      return await interaction.reply({
-        embeds: [{
-          color: 0x0099ff,
-          title: languageManager.translate(userId, 'language.title'),
-          description: languageManager.translate(userId, 'language.current', { language: currentLangName }),
-          fields: [
-            {
-              name: languageManager.translate(userId, 'language.available'),
-              value: languageList,
-              inline: false
+      // Jika tidak ada argumen, tampilkan bahasa saat ini dan yang tersedia
+      if (!newLanguage) {
+        const currentLang = languageManager.getUserLanguage(userId);
+        const currentLangName = languageManager.getLanguageName(currentLang, currentLang);
+        const availableLanguages = languageManager.getAvailableLanguages();
+        
+        let languageList = '';
+        availableLanguages.forEach(code => {
+          const name = languageManager.getLanguageName(code, currentLang);
+          languageList += `\`${code}\` - ${name}\n`;
+        });
+
+        return await interaction.editReply({
+          embeds: [{
+            color: 0x0099ff,
+            title: languageManager.translate(userId, 'language.title'),
+            description: languageManager.translate(userId, 'language.current', { language: currentLangName }),
+            fields: [
+              {
+                name: languageManager.translate(userId, 'language.available'),
+                value: languageList,
+                inline: false
+              },
+              {
+                name: languageManager.translate(userId, 'language.usage', { prefix: '/' }),
+                value: `\`/language en\` - English\n\`/language id\` - Indonesia`,
+                inline: false
+              }
+            ],
+            footer: {
+              text: `${interaction.user.username}`,
+              icon_url: interaction.user.displayAvatarURL()
             },
-            {
-              name: languageManager.translate(userId, 'language.usage', { prefix: '/' }),
-              value: `\`/language en\` - English\n\`/language id\` - Indonesia`,
-              inline: false
-            }
-          ],
+            timestamp: new Date()
+          }]
+        });
+      }
+
+      // Set bahasa baru
+      languageManager.setUserLanguage(userId, newLanguage);
+      const newLanguageName = languageManager.getLanguageName(newLanguage, newLanguage);
+
+      await interaction.editReply({
+        embeds: [{
+          color: 0x00ff00,
+          title: languageManager.translate(userId, 'language.title'),
+          description: languageManager.translate(userId, 'language.changed', { 
+            language: newLanguageName 
+          }),
           footer: {
             text: `${interaction.user.username}`,
             icon_url: interaction.user.displayAvatarURL()
@@ -143,27 +167,20 @@ module.exports = {
           timestamp: new Date()
         }]
       });
+
+      console.log(`Language changed: ${interaction.user.username} set language to ${newLanguage}`);
+      
+    } catch (error) {
+      console.error('Error in language slash command:', error);
+      try {
+        if (interaction.deferred) {
+          await interaction.editReply('❌ Error changing language. Try again later.');
+        } else {
+          await interaction.reply('❌ Error changing language. Try again later.');
+        }
+      } catch (replyError) {
+        console.error('Failed to send error reply:', replyError);
+      }
     }
-
-    // Set bahasa baru
-    languageManager.setUserLanguage(userId, newLanguage);
-    const newLanguageName = languageManager.getLanguageName(newLanguage, newLanguage);
-
-    await interaction.reply({
-      embeds: [{
-        color: 0x00ff00,
-        title: languageManager.translate(userId, 'language.title'),
-        description: languageManager.translate(userId, 'language.changed', { 
-          language: newLanguageName 
-        }),
-        footer: {
-          text: `${interaction.user.username}`,
-          icon_url: interaction.user.displayAvatarURL()
-        },
-        timestamp: new Date()
-      }]
-    });
-
-    console.log(`Language changed: ${interaction.user.username} set language to ${newLanguage}`);
   }
 };

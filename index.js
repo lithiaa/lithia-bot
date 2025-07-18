@@ -134,19 +134,49 @@ client.on('interactionCreate', async (interaction) => {
 
   console.log(`✅ Executing slash command: ${interaction.commandName} by ${interaction.user.username}`);
 
+  // Set a timeout to auto-defer if command takes too long
+  const timeoutId = setTimeout(async () => {
+    if (!interaction.replied && !interaction.deferred) {
+      console.log(`⏰ Auto-deferring ${interaction.commandName} due to timeout`);
+      try {
+        await interaction.deferReply();
+      } catch (error) {
+        console.error('Failed to auto-defer:', error);
+      }
+    }
+  }, 2500); // Defer after 2.5 seconds if not already done
+
   try {
     if (command.executeSlash) {
       await command.executeSlash(interaction);
       console.log(`✅ Successfully executed slash command: ${interaction.commandName}`);
     } else {
       console.log('  └─ No executeSlash method, using fallback');
+      
+      // Defer if not already done
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.deferReply();
+      }
+      
       // Fallback: convert interaction to message-like object for backward compatibility
       const fakeMessage = {
         author: interaction.user,
         channel: interaction.channel,
         guild: interaction.guild,
-        reply: (content) => interaction.reply(content),
-        send: (content) => interaction.reply(content)
+        reply: (content) => {
+          if (interaction.deferred) {
+            return interaction.editReply(content);
+          } else {
+            return interaction.reply(content);
+          }
+        },
+        send: (content) => {
+          if (interaction.deferred) {
+            return interaction.editReply(content);
+          } else {
+            return interaction.reply(content);
+          }
+        }
       };
       
       const args = [];
@@ -162,17 +192,22 @@ client.on('interactionCreate', async (interaction) => {
     }
   } catch (error) {
     console.error(`❌ Error executing command ${interaction.commandName}:`, error);
-    const errorMsg = languageManager.translate(interaction.user.id, 'bot.error');
     
     try {
-      if (interaction.replied || interaction.deferred) {
+      const errorMsg = '❌ An error occurred while executing this command.';
+      
+      if (interaction.replied) {
         await interaction.followUp({ content: errorMsg, ephemeral: true });
+      } else if (interaction.deferred) {
+        await interaction.editReply(errorMsg);
       } else {
         await interaction.reply({ content: errorMsg, ephemeral: true });
       }
     } catch (replyError) {
       console.error('Failed to send error message:', replyError);
     }
+  } finally {
+    clearTimeout(timeoutId);
   }
 });
 
