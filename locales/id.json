@@ -52,5 +52,8 @@
       "en": "Inggris",
       "id": "Indonesia"
     }
+  },
+  "activedevbadge": {
+    "response": "Selamat! 🎉 Anda sekarang dapat mengklaim **Active Developer Badge**!\n\nInteraksi command ini memenuhi syarat untuk mendapatkan Discord Active Developer Badge. Kunjungi link di bawah untuk mengklaimnya!"
   }
 }

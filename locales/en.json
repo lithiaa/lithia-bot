@@ -52,5 +52,8 @@
       "en": "English",
       "id": "Indonesian"
     }
+  },
+  "activedevbadge": {
+    "response": "Congratulations! 🎉 You can now claim your **Active Developer Badge**!\n\nThis command interaction qualifies you for the Discord Active Developer Badge. Visit the link below to claim it!"
   }
 }
